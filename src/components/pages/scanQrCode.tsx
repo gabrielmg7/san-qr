@@ -18,13 +18,15 @@ interface IScanQrCodeProps {
 }
 
 function ScanQrCode({ idCompra }: IScanQrCodeProps) {
-    const [tokenJWT, setTokenJWT] = React.useState<any>('');
+    const [tokenJWT, setTokenJWT] = React.useState<string>(''); // Armazena o JWT retornado pelo backend
+    const [compraSalva, setCompraSalva] = React.useState<boolean>(false);
 
     async function salvarCompra(compra: ICompra) {
         try {
             const response = await axios.post<ICompra>('URL_DO_BACKEND/compras', compra);
             // Lógica adicional após salvar a compra
             console.log('Compra salva com sucesso!', response.data);
+            setCompraSalva(true);
         } catch (error) {
             console.error('Erro ao salvar a compra:', error);
         }
@@ -38,7 +40,7 @@ function ScanQrCode({ idCompra }: IScanQrCodeProps) {
             const { tokenJWT } = response.data;
             // Lógica adicional após gerar o voucher
             console.log('Voucher gerado:', tokenJWT);
-            setTokenJWT(tokenJWT);
+            setTokenJWT(tokenJWT); // Armazena o JWT retornado pelo backend
         } catch (error) {
             console.error('Erro ao gerar o voucher:', error);
         }
@@ -51,13 +53,22 @@ function ScanQrCode({ idCompra }: IScanQrCodeProps) {
 
     return (
         <div>
-            <button onClick={() => salvarCompra({ nomeComprador: 'Nome', cpfComprador: '123', dataCompra: new Date(), itens: ['item1', 'item2'] })}>
+            <button onClick={() =>
+                salvarCompra({
+                    nomeComprador: 'Nome',
+                    cpfComprador: '123',
+                    dataCompra: new Date(),
+                    itens: ['item1', 'item2'],
+                })
+            }>
                 Salvar Compra
             </button>
-            <button onClick={() => gerarVoucher(idCompra)}>
-                Gerar Voucher
-            </button>
-            {tokenJWT && exibirQRCode(tokenJWT)}
+            {compraSalva && (
+                <button onClick={() => gerarVoucher(idCompra)}>
+                    Gerar Voucher
+                </button>
+            )}
+            {tokenJWT && exibirQRCode(tokenJWT)} {/* Renderiza o QR Code se o tokenJWT estiver presente */}
         </div>
     );
 }
